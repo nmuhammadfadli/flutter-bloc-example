@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc_example/core/models/load_status.dart';
 
+import '../../../core/models/load_status.dart';
 import '../data/post_model.dart';
 
 class PostsState extends Equatable {
@@ -8,6 +8,7 @@ class PostsState extends Equatable {
   final String searchQuery;
   final int page;
   final bool hasMore;
+  final bool isLoadingMore;
   final LoadStatus status;
   final String? message;
 
@@ -16,6 +17,7 @@ class PostsState extends Equatable {
     required this.searchQuery,
     required this.page,
     required this.hasMore,
+    required this.isLoadingMore,
     required this.status,
     this.message,
   });
@@ -25,6 +27,7 @@ class PostsState extends Equatable {
         searchQuery = '',
         page = 1,
         hasMore = true,
+        isLoadingMore = false,
         status = LoadStatus.initial,
         message = null;
 
@@ -39,6 +42,7 @@ class PostsState extends Equatable {
     String? searchQuery,
     int? page,
     bool? hasMore,
+    bool? isLoadingMore,
     LoadStatus? status,
     String? message,
   }) {
@@ -47,11 +51,12 @@ class PostsState extends Equatable {
       searchQuery: searchQuery ?? this.searchQuery,
       page: page ?? this.page,
       hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       status: status ?? this.status,
       message: message,
     );
   }
 
   @override
-  List<Object?> get props => [items, searchQuery, page, hasMore, status, message];
+  List<Object?> get props => [items, searchQuery, page, hasMore, isLoadingMore, status, message];
 }
