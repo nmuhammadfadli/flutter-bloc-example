@@ -14,8 +14,8 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SectionScaffold(
-      title: 'Login + SharedPreferences',
-      subtitle: 'Validasi email/password dan simpan session login secara lokal.',
+      title: 'Login',
+      subtitle: 'Login API dan disimpan pada SharedPreferences',
       child: BlocBuilder<LoginBloc, LoginState>(
         builder: (context, state) {
           if (!state.sessionLoaded && state.status == LoadStatus.loading) {
@@ -27,33 +27,47 @@ class LoginPage extends StatelessWidget {
               _SessionBanner(state: state),
               const SizedBox(height: 16),
               TextField(
-                onChanged: (value) => context.read<LoginBloc>().add(LoginEmailChanged(value)),
+                onChanged: (value) =>
+                    context.read<LoginBloc>().add(LoginUsernameChanged(value)),
                 decoration: InputDecoration(
-                  labelText: 'Email',
-                  helperText: 'Gunakan format email valid.',
-                  errorText: state.email.isEmpty || state.isEmailValid ? null : 'Email tidak valid',
+                  labelText: 'Username',
+                  helperText: 'Contoh: admin123',
+                  errorText: state.username.isEmpty || state.isUsernameValid
+                      ? null
+                      : 'Username tidak valid',
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 obscureText: true,
-                onChanged: (value) => context.read<LoginBloc>().add(LoginPasswordChanged(value)),
+                onChanged: (value) =>
+                    context.read<LoginBloc>().add(LoginPasswordChanged(value)),
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  helperText: 'Minimal 6 karakter.',
-                  errorText: state.password.isEmpty || state.isPasswordValid ? null : 'Minimal 6 karakter',
+                  
+                  errorText: state.password.isEmpty || state.isPasswordValid
+                      ? null
+                      : 'Minimal 6 karakter',
                 ),
               ),
               const SizedBox(height: 16),
               FilledButton(
-                onPressed: state.status == LoadStatus.loading ? null : () => context.read<LoginBloc>().add(const LoginSubmitted()),
+                onPressed: state.status == LoadStatus.loading
+                    ? null
+                    : () => context.read<LoginBloc>().add(const LoginSubmitted()),
                 child: state.status == LoadStatus.loading
-                    ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Text('Submit'),
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
-                onPressed: state.isAuthenticated ? () => context.read<LoginBloc>().add(const LoginLoggedOut()) : null,
+                onPressed: state.isAuthenticated
+                    ? () => context.read<LoginBloc>().add(const LoginLoggedOut())
+                    : null,
                 icon: const Icon(Icons.logout),
                 label: const Text('Logout'),
               ),
@@ -102,12 +116,14 @@ class _SessionBanner extends StatelessWidget {
                 children: [
                   Text(
                     state.isAuthenticated ? 'Session aktif' : 'Belum login',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     state.isAuthenticated
-                        ? 'Email tersimpan: ${state.savedEmail ?? state.email}'
+                        ? 'Username tersimpan: ${state.savedUsername ?? state.username}'
                         : 'Login akan disimpan secara lokal melalui SharedPreferences.',
                   ),
                 ],

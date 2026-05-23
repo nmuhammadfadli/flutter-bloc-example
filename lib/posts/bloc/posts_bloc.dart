@@ -20,26 +20,52 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
     await _loadFirstPage(emit);
   }
 
-  Future<void> _onRefreshed(PostsRefreshed event, Emitter<PostsState> emit) async {
+  Future<void> _onRefreshed(
+    PostsRefreshed event,
+    Emitter<PostsState> emit,
+  ) async {
     await _loadFirstPage(emit);
   }
 
-  Future<void> _onNextPageRequested(PostsNextPageRequested event, Emitter<PostsState> emit) async {
-    if (!state.hasMore || state.status == LoadStatus.loading || state.isLoadingMore) return;
+  Future<void> _onNextPageRequested(
+    PostsNextPageRequested event,
+    Emitter<PostsState> emit,
+  ) async {
+    if (!state.hasMore ||
+        state.status == LoadStatus.loading ||
+        state.isLoadingMore)
+      return;
 
-    emit(state.copyWith(status: LoadStatus.loading, isLoadingMore: true, message: null));
+    emit(
+      state.copyWith(
+        status: LoadStatus.loading,
+        isLoadingMore: true,
+        message: null,
+      ),
+    );
     try {
       final nextPage = state.page + 1;
-      final nextItems = await repository.fetchPosts(page: nextPage, limit: _limit);
-      emit(state.copyWith(
-        items: [...state.items, ...nextItems],
+      final nextItems = await repository.fetchPosts(
         page: nextPage,
-        hasMore: nextItems.length == _limit,
-        isLoadingMore: false,
-        status: LoadStatus.success,
-      ));
+        limit: _limit,
+      );
+      emit(
+        state.copyWith(
+          items: [...state.items, ...nextItems],
+          page: nextPage,
+          hasMore: nextItems.length == _limit,
+          isLoadingMore: false,
+          status: LoadStatus.success,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(status: LoadStatus.failure, isLoadingMore: false, message: e.toString()));
+      emit(
+        state.copyWith(
+          status: LoadStatus.failure,
+          isLoadingMore: false,
+          message: e.toString(),
+        ),
+      );
     }
   }
 
@@ -48,17 +74,34 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
   }
 
   Future<void> _loadFirstPage(Emitter<PostsState> emit) async {
-    emit(state.copyWith(status: LoadStatus.loading, message: null, page: 1, hasMore: true, isLoadingMore: false, items: []));
+    emit(
+      state.copyWith(
+        status: LoadStatus.loading,
+        message: null,
+        page: 1,
+        hasMore: true,
+        isLoadingMore: false,
+        items: [],
+      ),
+    );
     try {
       final items = await repository.fetchPosts(page: 1, limit: _limit);
-      emit(state.copyWith(
-        items: items,
-        status: LoadStatus.success,
-        hasMore: items.length == _limit,
-        isLoadingMore: false,
-      ));
+      emit(
+        state.copyWith(
+          items: items,
+          status: LoadStatus.success,
+          hasMore: items.length == _limit,
+          isLoadingMore: false,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(status: LoadStatus.failure, isLoadingMore: false, message: e.toString()));
+      emit(
+        state.copyWith(
+          status: LoadStatus.failure,
+          isLoadingMore: false,
+          message: e.toString(),
+        ),
+      );
     }
   }
 }

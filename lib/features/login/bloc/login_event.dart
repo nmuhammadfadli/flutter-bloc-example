@@ -11,12 +11,12 @@ final class LoginStarted extends LoginEvent {
   const LoginStarted();
 }
 
-final class LoginEmailChanged extends LoginEvent {
-  final String email;
-  const LoginEmailChanged(this.email);
+final class LoginUsernameChanged extends LoginEvent {
+  final String username;
+  const LoginUsernameChanged(this.username);
 
   @override
-  List<Object?> get props => [email];
+  List<Object?> get props => [username];
 }
 
 final class LoginPasswordChanged extends LoginEvent {

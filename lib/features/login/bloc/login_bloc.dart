@@ -10,7 +10,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   LoginBloc(this.sessionRepository) : super(const LoginState.initial()) {
     on<LoginStarted>(_onStarted);
-    on<LoginEmailChanged>(_onEmailChanged);
+    on<LoginUsernameChanged>(_onUsernameChanged);
     on<LoginPasswordChanged>(_onPasswordChanged);
     on<LoginSubmitted>(_onSubmitted);
     on<LoginLoggedOut>(_onLoggedOut);
@@ -24,46 +24,112 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       return;
     }
 
-    emit(state.copyWith(
-      status: LoadStatus.success,
-      isAuthenticated: true,
-      savedEmail: session.email,
-      sessionLoaded: true,
-      message: 'Session login berhasil dimuat dari SharedPreferences.',
-    ));
+    emit(
+      state.copyWith(
+        status: LoadStatus.success,
+        isAuthenticated: true,
+        savedUsername: session.username,
+        sessionLoaded: true,
+        message: 'Session login berhasil dimuat dari sharedpreferences',
+      ),
+    );
   }
 
-  void _onEmailChanged(LoginEmailChanged event, Emitter<LoginState> emit) {
-    emit(state.copyWith(email: event.email, status: LoadStatus.initial, message: null));
+  void _onUsernameChanged(LoginUsernameChanged event, Emitter<LoginState> emit) {
+    emit(
+      state.copyWith(
+        username: event.username,
+        status: LoadStatus.initial,
+        message: null,
+      ),
+    );
   }
 
-  void _onPasswordChanged(LoginPasswordChanged event, Emitter<LoginState> emit) {
-    emit(state.copyWith(password: event.password, status: LoadStatus.initial, message: null));
+  void _onPasswordChanged(
+    LoginPasswordChanged event,
+    Emitter<LoginState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        password: event.password,
+        status: LoadStatus.initial,
+        message: null,
+      ),
+    );
   }
 
-  Future<void> _onSubmitted(LoginSubmitted event, Emitter<LoginState> emit) async {
+  Future<void> _onSubmitted(
+    LoginSubmitted event,
+    Emitter<LoginState> emit,
+  ) async {
     if (!state.canSubmit) {
-      emit(state.copyWith(status: LoadStatus.failure, message: 'Email atau password belum valid.'));
+      emit(
+        state.copyWith(
+          status: LoadStatus.failure,
+          message: 'Username atau password belum valid.',
+        ),
+      );
       return;
     }
 
     emit(state.copyWith(status: LoadStatus.loading, message: null));
-    final token = 'token_${DateTime.now().millisecondsSinceEpoch}';
-    await sessionRepository.saveSession(email: state.email, token: token);
+    try {
 
-    emit(state.copyWith(
+  emit(
+    state.copyWith(
+      status: LoadStatus.loading,
+      message: null,
+    ),
+  );
+
+  final token = await sessionRepository.login(
+    username: state.username,
+    password: state.password,
+  );
+
+  await sessionRepository.saveSession(
+    username: state.username,
+    token: token,
+  );
+
+  emit(
+    state.copyWith(
       status: LoadStatus.success,
       isAuthenticated: true,
-      savedEmail: state.email,
-      message: 'Login valid. Session disimpan lokal dengan SharedPreferences.',
-    ));
+      savedUsername: state.username,
+      message: 'Login berhasil dari API.',
+    ),
+  );
+
+} catch (e) {
+
+  emit(
+    state.copyWith(
+      status: LoadStatus.failure,
+      message: 'Username atau password salah',
+    ),
+  );
+}
+
+    emit(
+      state.copyWith(
+        status: LoadStatus.success,
+        isAuthenticated: true,
+        savedUsername: state.username,
+        message:
+            'Login berhasil',
+      ),
+    );
   }
 
-  Future<void> _onLoggedOut(LoginLoggedOut event, Emitter<LoginState> emit) async {
+  Future<void> _onLoggedOut(
+    LoginLoggedOut event,
+    Emitter<LoginState> emit,
+  ) async {
     await sessionRepository.clearSession();
     final nextState = LoginState.initial().copyWith(
       status: LoadStatus.success,
-      message: 'Berhasil logout dan session dihapus.',
+      message: 'Berhasil logout',
       sessionLoaded: true,
     );
     emit(nextState);
